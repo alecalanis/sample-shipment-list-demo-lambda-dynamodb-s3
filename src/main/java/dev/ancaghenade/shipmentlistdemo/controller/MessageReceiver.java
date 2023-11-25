@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 public class MessageReceiver {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
+  private static final Logger log = LoggerFactory.getLogger(MessageReceiver.class);
   private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
   private final ShipmentService shipmentService;
@@ -31,7 +31,7 @@ public class MessageReceiver {
 
   @SqsListener(value = "update_shipment_picture_queue")
   public void loadMessagesFromQueue(String notification) {
-    LOGGER.info("Message from queue %s" + notification);
+    log.info("Message from queue %s" + notification);
 
     JSONObject obj = new JSONObject(notification);
     String message = obj.getString("Message");
@@ -48,7 +48,7 @@ public class MessageReceiver {
         sseEmitter.completeWithError(e);
       }
       sseEmitter.complete();
-      LOGGER.info("SSE emitter complete.");
+      log.info("SSE emitter complete.");
     }
   }
 
@@ -61,7 +61,7 @@ public class MessageReceiver {
     emitter.onCompletion(() -> {
       synchronized (emitters) {
         emitters.remove(emitter);
-        LOGGER.info("SseEmitter is completed");
+        log.info("SseEmitter is completed");
       }
     });
 
@@ -70,7 +70,7 @@ public class MessageReceiver {
         emitters.remove(emitter);
       }
       emitter.complete();
-      LOGGER.info("SseEmitter is timed out");
+      log.info("SseEmitter is timed out");
     });
 
     emitter.onError(e -> {
@@ -90,7 +90,7 @@ public class MessageReceiver {
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      log.error("", e);
       sseEmitter.completeWithError(e);
     }
   }

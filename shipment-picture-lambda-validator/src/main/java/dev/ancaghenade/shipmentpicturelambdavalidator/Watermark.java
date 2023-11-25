@@ -27,7 +27,7 @@ public class Watermark {
     g2d.setFont(font);
     g2d.setColor(color);
     g2d.rotate(Math.toRadians(45), 50, 50);
-    g2d.drawString("Banana for scale approved!", 50, 50);
+    g2d.drawString("Banana Approved!", 50, 50);
 
     var baos = new ByteArrayOutputStream();
     ImageIO.write(watermarkedImage, extension, baos);

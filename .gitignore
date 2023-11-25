@@ -58,9 +58,13 @@ src/main/shipment-list-frontend/yarn-error.log*
 
 # terraform
 
-setup/terraform/terraform.tfstate
-setup/terraform/.terraform.lock.hcl
-setup/terraform/terraform.tfstate.backup
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+# will be created by terraform script
+src/main/resources/buckets.properties
 
 # lambda module
 /shipment-picture-lambda-validator/.idea

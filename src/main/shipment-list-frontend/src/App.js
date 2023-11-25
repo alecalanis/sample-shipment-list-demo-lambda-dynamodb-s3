@@ -4,6 +4,8 @@ import axios from "axios";
 import './App.css';
 import SSEManager from './SSEManager';
 import placeholder from './placeholder.jpg';
+import { v4 as uuidv4 } from 'uuid';
+import generateShipmentData from './data';
 
 const Shipments = () => {
   const [shipments, setShipments] = useState([]);
@@ -26,6 +28,23 @@ const Shipments = () => {
   useEffect(() => {
     fetchShipments();
   }, [isFetchingComplete]);
+
+  function handleCreate() {
+    var demodata = generateShipmentData(uuidv4())
+    axios.post("http://localhost:8081/api/shipment", demodata, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(res => {
+      // add the created shipment on top of the list. we don't need to re-fetch the list
+      console.log("shipment created: " + res.data)
+      const newList = [demodata,...shipments];
+      setShipments(newList);
+    }).catch(err => {
+      console.log("shipment create failed: " + err)
+    });
+  }  
 
   function handleRemove(shipmentId) {
     axios.delete(`http://localhost:8081/api/shipment/${shipmentId}`)
@@ -63,9 +82,11 @@ const Shipments = () => {
   return (
       <div key={refreshKey}>
         <SSEManager onEvent={handleSSEEvent} onError={handleSSEError}/>
-
-        {shipments.map((shipment, index) => (
-            <div key={index} style={{
+        <div>
+          <button className={"btn"} onClick={handleCreate}>create new shipment</button>
+        </div>
+        {shipments.map((shipment) => (
+            <div key={shipment.shipmentId} style={{
               display: "flex",
               alignItems: "center", /* centers the items vertically */
               justifyContent: "center",
@@ -88,10 +109,10 @@ const Shipments = () => {
                 <br/>
 
                 <h2> Shipment ID: {shipment.shipmentId}</h2>
-                <h3>From: {shipment.sender.name}</h3>
-                <h3>Address: {shipment.sender.address.postalCode} {shipment.sender.address.street} {shipment.sender.address.number} {shipment.sender.address.city}</h3>
-                <h3>To: {shipment.recipient.name}</h3>
-                <h3>Address: {shipment.recipient.address.postalCode} {shipment.recipient.address.street} {shipment.recipient.address.number} {shipment.recipient.address.city}</h3>
+                <h3>From: {shipment.sender?.name}</h3>
+                <h3>Address: {shipment.sender?.address?.postalCode} {shipment.sender?.address?.street} {shipment.sender?.address?.number} {shipment.sender?.address?.city}</h3>
+                <h3>To: {shipment.recipient?.name}</h3>
+                <h3>Address: {shipment.recipient?.address?.postalCode} {shipment.recipient?.address?.street} {shipment.recipient?.address?.number} {shipment.recipient?.address?.city}</h3>
                 <h3>Weight: {shipment.weight}</h3>
                 <button className={"btn"}
                         onClick={() => handleRemove(shipment.shipmentId)}>
@@ -141,9 +162,8 @@ function Dropzone(
               (
                   <div>
                     <h3 style={{margin: 0}}>Size (Banana for scale):</h3>
-                    <h5 style={{margin: 0}}>click to add new image</h5>
+                    <h5 style={{margin: 0}}>click to add or drop new image</h5>
                   </div>)
-
         }
       </div>
   )
@@ -154,7 +174,7 @@ function App() {
       <div className="App" style={{
         paddingBottom: "100px"
       }}>
-        <h1>Shipments you can see and edit</h1>
+        <h1>Shipments you can see, and pictures you can edit</h1>
         <Shipments/>
       </div>
   );
